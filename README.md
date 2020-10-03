@@ -3,6 +3,7 @@
 Display the VFR_HUD using the M5 stack.   
 VFR_HUD contains an indicator that appears on the heads-up display.   
 This project use [this](https://github.com/mavlink/c_library_v2) library.   
+![screen](https://user-images.githubusercontent.com/6020549/95003522-13bd7880-061b-11eb-88a8-926b4e064381.JPG)
 
 # Hardware requirements   
 - M5Stack   
