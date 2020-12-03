@@ -220,13 +220,13 @@ void tft(void *pvParameters)
 					strcpy((char *)ascii, "groundspeed : ");
 					lcdDrawString(&dev, fx, xpos, ypos, ascii, CYAN);
 					ypos = ypos + fontHeight;
-					strcpy((char *)ascii, "alt		   : ");
+					strcpy((char *)ascii, "alt         : ");
 					lcdDrawString(&dev, fx, xpos, ypos, ascii, CYAN);
 					ypos = ypos + fontHeight;
-					strcpy((char *)ascii, "climb	   : ");
+					strcpy((char *)ascii, "climb       : ");
 					lcdDrawString(&dev, fx, xpos, ypos, ascii, CYAN);
 					ypos = ypos + fontHeight;
-					strcpy((char *)ascii, "heading	   : ");
+					strcpy((char *)ascii, "heading     : ");
 					lcdDrawString(&dev, fx, xpos, ypos, ascii, CYAN);
 					ypos = ypos + fontHeight;
 					strcpy((char *)ascii, "throttle    : ");
@@ -421,7 +421,13 @@ void tft(void *pvParameters)
 			lcdDrawFillRect(&dev, xTitle, 0, SCREEN_WIDTH-1, fontHeight-1, BLACK);
 			strcpy((char *)subTitle, "General Info");
 			lcdDrawString(&dev, fx, xTitle, yTitle, subTitle, YELLOW);
-			drawGeneral = 0; // Draw Frame
+			drawGeneral = 0; // Draw Title
+			cmdBufOld.airspeed = FLT_MAX;
+			cmdBufOld.groundspeed = FLT_MAX;
+			cmdBufOld.alt = FLT_MAX;
+			cmdBufOld.climb = FLT_MAX;
+			cmdBufOld.heading = INT16_MAX;
+			cmdBufOld.throttle = UINT16_MAX;
 		} else if (cmdBuf.command == CMD_BUTTON_MIDDLE) {
 			screen = 2;
 			lcdDrawFillRect(&dev, xTitle, 0, SCREEN_WIDTH-1, fontHeight-1, BLACK);
