@@ -109,115 +109,12 @@ typedef struct __mavlink_message {
 			msgReceived = mavlink_frame_char_buffer(&_rxmsg, &_rxstatus, result, &_message, &_mav_status);
 			ESP_LOGD(TAG,"msgReceived=%d", msgReceived);
 			if (msgReceived == 1) {
-				ESP_LOGD(TAG,"_message.msgid=%d", _message.msgid);
+				ESP_LOGI(TAG,"_message.msgid=%d _message.compid=%d", _message.msgid, _message.compid);
 
-				if (_message.sysid == 1 && _message.compid == 240) {
+				if (_message.compid != 1) {
 					ESP_LOGI(TAG,"sysid=%d compid=%d seq=%d msgid=%d",_message.sysid, _message.compid, _message.seq, _message.msgid);
+					continue;
 				}
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_RADIO_STATUS) {
-					ESP_LOGD(TAG,"RADIO_STATUS");
-					ESP_LOGD(TAG,"sysid=%d compid=%d seq=%d",_message.sysid, _message.compid, _message.seq);
-				}
-#endif
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_RADIO_STATUS) {
-					ESP_LOGI(TAG,"RADIO_STATUS");
-					ESP_LOGI(TAG,"sysid=%d compid=%d seq=%d",_message.sysid, _message.compid, _message.seq);
-				}
-
-				if (_message.msgid ==  MAVLINK_MSG_ID_HEARTBEAT) {
-					ESP_LOGI(TAG,"HEARTBEAT");
-					ESP_LOGI(TAG,"sysid=%d compid=%d seq=%d",_message.sysid, _message.compid, _message.seq);
-				}
-
-				if (_message.msgid ==  MAVLINK_MSG_ID_PARAM_REQUEST_LIST) {
-					ESP_LOGI(TAG,"PARAM_REQUEST_LIST");
-					ESP_LOGI(TAG,"sysid=%d compid=%d seq=%d",_message.sysid, _message.compid, _message.seq);
-				}
-				if (_message.msgid ==  MAVLINK_MSG_ID_BATTERY_STATUS) {
-					mavlink_battery_status_t param;
-					mavlink_msg_battery_status_decode(&_message, &param);
-					ESP_LOGI(TAG,"BATTERY_STATUS");
-					ESP_LOGI(TAG,"battery_remaining=%d voltages=%u", param.battery_remaining, (unsigned int)param.voltages);
-				}
-#endif
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_LOCAL_POSITION_NED) {
-					mavlink_local_position_ned_t param;
-					mavlink_msg_local_position_ned_decode(&_message, &param);
-					ESP_LOGI(TAG,"LOCAL_POSITION_NED");
-					ESP_LOGI(TAG,"x=%f y=%f z=%f", param.x, param.y, param.z);
-					ESP_LOGI(TAG,"vx=%f vy=%f vz=%f", param.vx, param.vy, param.vz);
-				}
-#endif
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_ATTITUDE) {
-					mavlink_attitude_t param;
-					mavlink_msg_attitude_decode(&_message, &param);
-					ESP_LOGI(TAG,"ATTITUDE");
-					ESP_LOGI(TAG,"roll=%f pitch=%f yaw=%f", param.roll, param.pitch, param.yaw);
-					ESP_LOGI(TAG,"rollspeed=%f pitchspeed=%f yawspeed=%f", param.rollspeed, param.pitchspeed, param.yawspeed);
-				}
-#endif
-
-				if (_message.msgid ==  MAVLINK_MSG_ID_VFR_HUD) {
-					mavlink_vfr_hud_t param;
-					mavlink_msg_vfr_hud_decode(&_message, &param);
-					ESP_LOGD(TAG,"VFR_HUD");
-					ESP_LOGD(TAG,"sysid=%d compid=%d seq=%d",_message.sysid, _message.compid, _message.seq);
-					ESP_LOGD(TAG,"airspeed=%f groundspeed=%f alt=%f", param.airspeed, param.groundspeed, param.alt);
-					ESP_LOGD(TAG,"climb=%f heading=%d throttle=%d", param.climb, param.heading, param.throttle);
-					cmdBuf.command = CMD_MAVLINK;
-					cmdBuf.airspeed = param.airspeed;
-					cmdBuf.groundspeed = param.groundspeed;
-					cmdBuf.alt = param.alt;
-					cmdBuf.climb = param.climb;
-					cmdBuf.heading = param.heading;
-					cmdBuf.throttle = param.throttle;
-					xQueueSend(xQueueCmd, &cmdBuf, 0);
-				}
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_HIGHRES_IMU) {
-					mavlink_highres_imu_t param;
-					mavlink_msg_highres_imu_decode(&_message, &param);
-					ESP_LOGI(TAG,"HIGHRES_IMU");
-				}
-#endif
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_BATTERY_STATUS) {
-					mavlink_battery_status_t param;
-					mavlink_msg_battery_status_decode(&_message, &param);
-					ESP_LOGI(TAG,"BATTERY_STATUS");
-					ESP_LOGI(TAG,"battery_remaining=%d voltages=%u", param.battery_remaining, (unsigned int)param.voltages);
-				}
-#endif
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_LOCAL_POSITION_NED) {
-					mavlink_local_position_ned_t param;
-					mavlink_msg_local_position_ned_decode(&_message, &param);
-					ESP_LOGI(TAG,"LOCAL_POSITION_NED");
-					ESP_LOGI(TAG,"x=%f y=%f z=%f", param.x, param.y, param.z);
-					ESP_LOGI(TAG,"vx=%f vy=%f vz=%f", param.vx, param.vy, param.vz);
-				}
-#endif
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_ATTITUDE) {
-					mavlink_attitude_t param;
-					mavlink_msg_attitude_decode(&_message, &param);
-					ESP_LOGI(TAG,"ATTITUDE");
-					ESP_LOGI(TAG,"roll=%f pitch=%f yaw=%f", param.roll, param.pitch, param.yaw);
-					ESP_LOGI(TAG,"rollspeed=%f pitchspeed=%f yawspeed=%f", param.rollspeed, param.pitchspeed, param.yawspeed);
-				}
-#endif
 
 				if (_message.msgid ==  MAVLINK_MSG_ID_VFR_HUD) {
 					mavlink_vfr_hud_t param;
@@ -234,17 +131,6 @@ typedef struct __mavlink_message {
 					cmdBuf.throttle = param.throttle;
 					xQueueSend(xQueueCmd, &cmdBuf, 0);
 				}
-
-#if 0
-				if (_message.msgid ==  MAVLINK_MSG_ID_HIGHRES_IMU) {
-					mavlink_highres_imu_t param;
-					mavlink_msg_highres_imu_decode(&_message, &param);
-					ESP_LOGI(TAG,"HIGHRES_IMU");
-					ESP_LOGI(TAG,"xacc=%f yacc=%f zacc=%f", param.xacc, param.yacc, param.zacc);
-					ESP_LOGI(TAG,"xgyro=%f ygyro=%f zgyro=%f", param.xgyro, param.ygyro, param.zgyro);
-					ESP_LOGI(TAG,"xmag=%f ymag=%f zmag=%f", param.xmag, param.ymag, param.zmag);
-				}
-#endif
 
 			} else if (msgReceived == 2) {
 #if CONFIG_BAD_CRC
