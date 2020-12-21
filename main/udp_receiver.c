@@ -65,9 +65,14 @@ void receiver(void *pvParameters)
 	char buffer[128];
 	struct sockaddr_in senderInfo;
 	//socklen_t senderInfoLen = sizeof(senderInfo);
-	char senderstr[16];
 	CMD_t cmdBuf;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
+
+	mavlink_message_t _rxmsg;
+	mavlink_status_t  _rxstatus;
+	mavlink_message_t _message;
+	mavlink_status_t  _mav_status;
+	bzero(&_rxstatus, sizeof(mavlink_status_t));
 
 	while(1) {
 		socklen_t senderInfoLen = sizeof(senderInfo);
@@ -80,11 +85,13 @@ void receiver(void *pvParameters)
 		buffer[ret] = 0;
 		//ESP_LOGI(TAG,"lwip_recv buffer=%s",buffer);
 		ESP_LOG_BUFFER_HEXDUMP(TAG, buffer, ret, ESP_LOG_DEBUG);
+#if 0
+		char senderstr[16];
 		inet_ntop(AF_INET, &senderInfo.sin_addr, senderstr, sizeof(senderstr));
 		ESP_LOGD(TAG,"recvfrom : %s, port=%d", senderstr, ntohs(senderInfo.sin_port));
+#endif
 
-		uint8_t msgReceived;
-/*
+#if 0
 typedef struct __mavlink_message {
 	uint16_t checksum;		///< sent at end of packet
 	uint8_t magic;			///< protocol magic marker
@@ -99,29 +106,25 @@ typedef struct __mavlink_message {
 	uint8_t ck[2];			///< incoming checksum bytes
 	uint8_t signature[MAVLINK_SIGNATURE_BLOCK_LEN];
 }) mavlink_message_t;
-*/
-		mavlink_message_t _rxmsg;
-		mavlink_status_t  _rxstatus;
-		mavlink_message_t _message;
-		mavlink_status_t  _mav_status;
+#endif
+
 		for (int index=0; index<ret; index++) {
 			uint8_t result = buffer[index];
-			msgReceived = mavlink_frame_char_buffer(&_rxmsg, &_rxstatus, result, &_message, &_mav_status);
+			uint8_t msgReceived = mavlink_frame_char_buffer(&_rxmsg, &_rxstatus, result, &_message, &_mav_status);
 			ESP_LOGD(TAG,"msgReceived=%d", msgReceived);
 			if (msgReceived == 1) {
-				ESP_LOGI(TAG,"_message.msgid=%d _message.compid=%d", _message.msgid, _message.compid);
+				ESP_LOGD(TAG,"_message.msgid=%d _message.compid=%d", _message.msgid, _message.compid);
 
 				if (_message.compid != 1) {
-					ESP_LOGI(TAG,"sysid=%d compid=%d seq=%d msgid=%d",_message.sysid, _message.compid, _message.seq, _message.msgid);
+					ESP_LOGD(TAG,"sysid=%d compid=%d seq=%d msgid=%d",_message.sysid, _message.compid, _message.seq, _message.msgid);
 					continue;
 				}
 
 				if (_message.msgid ==  MAVLINK_MSG_ID_VFR_HUD) {
 					mavlink_vfr_hud_t param;
 					mavlink_msg_vfr_hud_decode(&_message, &param);
-					ESP_LOGD(TAG,"VFR_HUD");
-					ESP_LOGD(TAG,"airspeed=%f groundspeed=%f alt=%f", param.airspeed, param.groundspeed, param.alt);
-					ESP_LOGD(TAG,"climb=%f heading=%d throttle=%d", param.climb, param.heading, param.throttle);
+					ESP_LOGI(TAG,"VFR_HUD:airspeed=%f groundspeed=%f alt=%f", param.airspeed, param.groundspeed, param.alt);
+					ESP_LOGI(TAG,"VFR_HUD:climb=%f heading=%d throttle=%d", param.climb, param.heading, param.throttle);
 					cmdBuf.command = CMD_MAVLINK;
 					cmdBuf.airspeed = param.airspeed;
 					cmdBuf.groundspeed = param.groundspeed;
