@@ -22,7 +22,7 @@ mkdir -p components
 cd components/
 git clone https://github.com/mavlink/c_library_v2
 cd c_library_v2/
-lecho "COMPONENT_ADD_INCLUDEDIRS=." > component.mk
+echo "COMPONENT_ADD_INCLUDEDIRS=." > component.mk
 cd ../..
 make menuconfig
 make flash
