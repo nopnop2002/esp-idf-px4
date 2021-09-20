@@ -17,15 +17,16 @@ You can use [this](https://github.com/dogmaphobic/mavesp8266) as Bridge.
 # Install
 ```
 git clone https://github.com/nopnop2002/esp-idf-px4
-cd esp-idf-mqtt-px4
+cd esp-idf-px4
 mkdir -p components
 cd components/
 git clone https://github.com/mavlink/c_library_v2
 cd c_library_v2/
-echo "COMPONENT_ADD_INCLUDEDIRS=." > component.mk
+echo "idf_component_register(INCLUDE_DIRS \".\")" > CMakeLists.txt
 cd ../..
-make menuconfig
-make flash
+idf.py set-target esp32
+idf.py menuconfig
+idf.py flash monitor
 ```
 ![config-1](https://user-images.githubusercontent.com/6020549/95003113-b0c9e280-0616-11eb-8393-7b4c58f7b958.jpg)
 
