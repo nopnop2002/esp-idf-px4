@@ -26,35 +26,41 @@
 #include "cmd.h"
 
 // for M5Stack
-#define SCREEN_WIDTH	320
-#define SCREEN_HEIGHT	240
-#define CS_GPIO			14
-#define DC_GPIO			27
-#define RESET_GPIO		33
-#define BL_GPIO			32
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
+#define CONFIG_MOSI_GPIO 23
+#define CONFIG_SCLK_GPIO 18
+#define CONFIG_TFT_CS_GPIO 14
+#define CONFIG_DC_GPIO 27
+#define CONFIG_RESET_GPIO 33
+#define CONFIG_BL_GPIO 32
 #define DISPLAY_LENGTH	26
-#define GPIO_INPUT_A	GPIO_NUM_39
-#define GPIO_INPUT_B	GPIO_NUM_38
-#define GPIO_INPUT_C	GPIO_NUM_37
+#define GPIO_INPUT_A GPIO_NUM_39
+#define GPIO_INPUT_B GPIO_NUM_38
+#define GPIO_INPUT_C GPIO_NUM_37
 
 extern QueueHandle_t xQueueCmd;
 
 // Left Button Monitoring
 void buttonA(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(NULL), "Start");
 	CMD_t cmdBuf;
 	cmdBuf.command = CMD_BUTTON_LEFT;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
 
 	// set the GPIO as a input
-	gpio_pad_select_gpio(GPIO_INPUT_A);
-	gpio_set_direction(GPIO_INPUT_A, GPIO_MODE_DEF_INPUT);
+	//gpio_reset_pin(GPIO_INPUT_A);
+	//gpio_set_direction(GPIO_INPUT_A, GPIO_MODE_DEF_INPUT);
+	gpio_config_t io_conf = {};
+	io_conf.mode = GPIO_MODE_INPUT;
+	io_conf.pin_bit_mask = (1ULL<<GPIO_INPUT_A);
+	gpio_config(&io_conf);
 
 	while(1) {
 		int level = gpio_get_level(GPIO_INPUT_A);
 		if (level == 0) {
-			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			ESP_LOGI(pcTaskGetName(NULL), "Push Button");
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_A);
 				if (level == 1) break;
@@ -69,19 +75,23 @@ void buttonA(void *pvParameters)
 // Middle Button Monitoring
 void buttonB(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(NULL), "Start");
 	CMD_t cmdBuf;
 	cmdBuf.command = CMD_BUTTON_MIDDLE;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
 
 	// set the GPIO as a input
-	gpio_pad_select_gpio(GPIO_INPUT_B);
-	gpio_set_direction(GPIO_INPUT_B, GPIO_MODE_DEF_INPUT);
+	//gpio_reset_pin(GPIO_INPUT_B);
+	//gpio_set_direction(GPIO_INPUT_B, GPIO_MODE_DEF_INPUT);
+	gpio_config_t io_conf = {};
+	io_conf.mode = GPIO_MODE_INPUT;
+	io_conf.pin_bit_mask = (1ULL<<GPIO_INPUT_B);
+	gpio_config(&io_conf);
 
 	while(1) {
 		int level = gpio_get_level(GPIO_INPUT_B);
 		if (level == 0) {
-			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			ESP_LOGI(pcTaskGetName(NULL), "Push Button");
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_B);
 				if (level == 1) break;
@@ -96,19 +106,23 @@ void buttonB(void *pvParameters)
 // Right Button Monitoring
 void buttonC(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(NULL), "Start");
 	CMD_t cmdBuf;
 	cmdBuf.command = CMD_BUTTON_RIGHT;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
 
 	// set the GPIO as a input
-	gpio_pad_select_gpio(GPIO_INPUT_C);
-	gpio_set_direction(GPIO_INPUT_C, GPIO_MODE_DEF_INPUT);
+	//gpio_reset_pin(GPIO_INPUT_C);
+	//gpio_set_direction(GPIO_INPUT_C, GPIO_MODE_DEF_INPUT);
+	gpio_config_t io_conf = {};
+	io_conf.mode = GPIO_MODE_INPUT;
+	io_conf.pin_bit_mask = (1ULL<<GPIO_INPUT_C);
+	gpio_config(&io_conf);
 
 	while(1) {
 		int level = gpio_get_level(GPIO_INPUT_C);
 		if (level == 0) {
-			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			ESP_LOGI(pcTaskGetName(NULL), "Push Button");
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_C);
 				if (level == 1) break;
@@ -125,7 +139,7 @@ void buttonC(void *pvParameters)
 
 void tft(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(NULL), "Start");
 	// Set font file
 	FontxFile fx[2];
 #if CONFIG_ESP_FONT_GOTHIC
@@ -140,18 +154,23 @@ void tft(void *pvParameters)
 	uint8_t fontWidth;
 	uint8_t fontHeight;
 	GetFontx(fx, 0, buffer, &fontWidth, &fontHeight);
-	ESP_LOGI(pcTaskGetTaskName(0), "fontWidth=%d fontHeight=%d",fontWidth,fontHeight);
+	ESP_LOGI(pcTaskGetName(NULL), "fontWidth=%d fontHeight=%d",fontWidth,fontHeight);
 
 	// Setup Screen
 	TFT_t dev;
-	spi_master_init(&dev, CS_GPIO, DC_GPIO, RESET_GPIO, BL_GPIO);
+	int MISO_GPIO = -1;
+	int XPT_CS_GPIO = -1;
+	int XPT_IRQ_GPIO = -1;
+	spi_master_init(&dev, CONFIG_MOSI_GPIO, CONFIG_SCLK_GPIO, CONFIG_TFT_CS_GPIO, CONFIG_DC_GPIO,
+		CONFIG_RESET_GPIO, CONFIG_BL_GPIO, MISO_GPIO, XPT_CS_GPIO, XPT_IRQ_GPIO);
+	//spi_master_init(&dev, CS_GPIO, DC_GPIO, RESET_GPIO, BL_GPIO);
 	lcdInit(&dev, 0x9341, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
-	ESP_LOGI(pcTaskGetTaskName(0), "Setup Screen done");
+	ESP_LOGI(pcTaskGetName(NULL), "Setup Screen done");
 
 	int lines = (SCREEN_HEIGHT - fontHeight) / fontHeight;
-	ESP_LOGD(pcTaskGetTaskName(0), "SCREEN_HEIGHT=%d fontHeight=%d lines=%d", SCREEN_HEIGHT, fontHeight, lines);
+	ESP_LOGD(pcTaskGetName(NULL), "SCREEN_HEIGHT=%d fontHeight=%d lines=%d", SCREEN_HEIGHT, fontHeight, lines);
 	int ymax = (lines+1) * fontHeight;
-	ESP_LOGD(pcTaskGetTaskName(0), "ymax=%d",ymax);
+	ESP_LOGD(pcTaskGetName(NULL), "ymax=%d",ymax);
 
 	// Clear Screen
 	lcdFillScreen(&dev, BLACK);
@@ -207,7 +226,7 @@ void tft(void *pvParameters)
 
 	while(1) {
 		xQueueReceive(xQueueCmd, &cmdBuf, portMAX_DELAY);
-		ESP_LOGD(pcTaskGetTaskName(0),"cmdBuf.command=%d screen=%d", cmdBuf.command, screen);
+		ESP_LOGD(pcTaskGetName(NULL),"cmdBuf.command=%d screen=%d", cmdBuf.command, screen);
 		if (cmdBuf.command == CMD_MAVLINK) {
 			if (screen == 1){
 				if (drawGeneral == 0) {
@@ -220,13 +239,13 @@ void tft(void *pvParameters)
 					strcpy((char *)ascii, "groundspeed : ");
 					lcdDrawString(&dev, fx, xpos, ypos, ascii, CYAN);
 					ypos = ypos + fontHeight;
-					strcpy((char *)ascii, "alt         : ");
+					strcpy((char *)ascii, "alt		   : ");
 					lcdDrawString(&dev, fx, xpos, ypos, ascii, CYAN);
 					ypos = ypos + fontHeight;
-					strcpy((char *)ascii, "climb       : ");
+					strcpy((char *)ascii, "climb	   : ");
 					lcdDrawString(&dev, fx, xpos, ypos, ascii, CYAN);
 					ypos = ypos + fontHeight;
-					strcpy((char *)ascii, "heading     : ");
+					strcpy((char *)ascii, "heading	   : ");
 					lcdDrawString(&dev, fx, xpos, ypos, ascii, CYAN);
 					ypos = ypos + fontHeight;
 					strcpy((char *)ascii, "throttle    : ");
@@ -408,7 +427,7 @@ void tft(void *pvParameters)
 				
 				if (airspeed > 20) airspeed = 20;
 				int16_t notched = 180 / 20;
-				ESP_LOGD(pcTaskGetTaskName(0),"airspeed=%d", airspeed);
+				ESP_LOGD(pcTaskGetName(NULL),"airspeed=%d", airspeed);
 				airspeed = airspeed * notched + 180;
 				float rad = airspeed * M_PI / 180.0;
 				xSpeed = xCenter + cos(rad) * (float)(speedRadius-5);

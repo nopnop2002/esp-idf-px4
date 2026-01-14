@@ -1,7 +1,9 @@
-#define CMD_BUTTON_LEFT		100
-#define CMD_BUTTON_MIDDLE	200
-#define CMD_BUTTON_RIGHT	300
-#define CMD_MAVLINK			400
+typedef enum {
+	CMD_BUTTON_LEFT,
+	CMD_BUTTON_MIDDLE,
+	CMD_BUTTON_RIGHT,
+	CMD_MAVLINK
+} command_t;
 
 // for Queue
 typedef struct {

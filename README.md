@@ -12,7 +12,8 @@ This project use [this](https://github.com/mavlink/c_library_v2) library.
 You can use [this](https://github.com/dogmaphobic/mavesp8266) as Bridge.   
 
 # Software requirements   
-- ESP-IDF   
+ESP-IDF V5.0 or later.   
+ESP-IDF V4.4 release branch reached EOL in July 2024.   
 
 # Install
 ```
