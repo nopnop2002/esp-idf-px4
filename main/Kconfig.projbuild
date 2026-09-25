@@ -28,7 +28,7 @@ menu "Application Configuration"
 
 	config BAD_CRC
 		bool "Display packets with CRC error"
-		default false
+		default n
 		help
 			Display packets with CRC error.
 
